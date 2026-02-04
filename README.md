@@ -1,5 +1,3 @@
 # galactic_ws
 
-Here we are
-
-okay but does it work now tho?
+Workspace for ROS2 code for ME 7785
