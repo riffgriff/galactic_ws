@@ -22,7 +22,7 @@ class find_object(Node):
             depth=1)
         
         self._img_subscriber = self.create_subscription(CompressedImage, '/image_raw/compressed', self._image_callback, qos_profile)
-        self._point_publish = self.create_publisher(Point, '/galactic_object/follower/object_coords', qos_profile)
+        self._point_publish = self.create_publisher(Point, '/galactic_object_follower/object_coords', qos_profile)
         # publish annotated debug image as CompressedImage so view_image_raw can subscribe
         self._img_publish = self.create_publisher(CompressedImage, '/find_object/bounding_box', qos_profile)
 
