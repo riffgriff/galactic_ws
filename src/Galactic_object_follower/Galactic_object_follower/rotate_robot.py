@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from geometry_msgs.msg import Point, Twist
+from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
 
 
 class RotateRobot(Node):
