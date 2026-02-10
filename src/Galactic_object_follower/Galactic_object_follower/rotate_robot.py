@@ -19,9 +19,15 @@ class RotateRobot(Node):
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.timer = self.create_timer(1/self.get_parameter('publish_frequency').value, self.publisher_callback)
 
+        qos_profile = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=1)
+        
         # set up subscriber
         self.point_msg = None
-        self.subscription_ = self.create_subscription(Point, '/galactic_object_follower/object_coords', self.subscription_callback, 10)
+        self.subscription_ = self.create_subscription(Point, '/galactic_object_follower/object_coords', self.subscription_callback, qos_profile)
 
     def publisher_callback(self):
         if self.point_msg is None:
