@@ -70,6 +70,7 @@ class find_object(Node):
         except (IndexError, cv2.error):
 			# negative Z for the case with no object
             p = Point(x=0.0, y=0.0, z=-1.0)
+			self._point_publish.publish(p)
 
         
 def main(args=None):
