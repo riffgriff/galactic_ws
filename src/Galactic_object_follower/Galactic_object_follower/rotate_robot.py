@@ -13,7 +13,7 @@ class RotateRobot(Node):
         super().__init__('minimal_publisher')
         self.declare_parameter('publish_frequency', 20)
         self.declare_parameter('pixel_width', 320)
-        self.declare_parameter('kp', 0.004)
+        self.declare_parameter('kp', 0.01)
         self.kp = self.get_parameter('kp').value
 
         # set up publisher
@@ -31,17 +31,20 @@ class RotateRobot(Node):
         self.subscription_ = self.create_subscription(Point, '/galactic_object_follower/object_coords', self.subscription_callback, qos_profile)
 
     def publisher_callback(self):
-        if self.point_msg is None:
-            return
-
-        # get pixel distance from center of screen
-        x = self.point_msg.x
-        dist = x - self.get_parameter('pixel_width').value / 2
-
         msg = Twist()
         # linear velocity defaults to zero, don't need to modify it
-        # angular velocity should be in the realm of 1 for large values of dist
-        msg.angular.z = -self.kp*dist
+        
+        if self.point_msg is None:
+            msg.angular.z = 0
+        else:
+            # get pixel distance from center of screen
+            x = self.point_msg.x
+            dist = x - self.get_parameter('pixel_width').value / 2
+    
+            
+            # angular velocity should be in the realm of 1 for large values of dist
+            msg.angular.z = -self.kp*dist
+            
         self.publisher_.publish(msg)
 
     def subscription_callback(self, msg):
