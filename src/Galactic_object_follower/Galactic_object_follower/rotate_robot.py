@@ -12,7 +12,7 @@ class RotateRobot(Node):
         # initialization things
         super().__init__('minimal_publisher')
         self.declare_parameter('publish_frequency', 20)
-        self.declare_parameter('pixel_width', 640)
+        self.declare_parameter('pixel_width', 320)
         self.declare_parameter('kp', 0.004)
         self.kp = self.get_parameter('kp').value
 
