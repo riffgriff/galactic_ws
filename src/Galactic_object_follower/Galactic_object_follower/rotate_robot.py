@@ -35,7 +35,7 @@ class RotateRobot(Node):
         # linear velocity defaults to zero, don't need to modify it
         
         if self.point_msg is None:
-            msg.angular.z = 0
+            msg.angular.z = 0.0
         else:
             # get pixel distance from center of screen
             x = self.point_msg.x
