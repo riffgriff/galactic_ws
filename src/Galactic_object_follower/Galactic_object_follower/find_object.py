@@ -68,7 +68,8 @@ class find_object(Node):
                 self._img_publish.publish(cim)
 
         except (IndexError, cv2.error):
-            biggest_component = thresholded
+			# negative Z for the case with no object
+            p = Point(x=0.0, y=0.0, z=-1.0)
 
         
 def main(args=None):
