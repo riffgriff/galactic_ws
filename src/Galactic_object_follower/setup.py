@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'rotate_robot=Galactic_object_follower.rotate_robot:main'
+            'rotate_robot=Galactic_object_follower.rotate_robot:main',
+            'find_object=Galactic_object_follower.find_object:main',
         ],
     },
 )
