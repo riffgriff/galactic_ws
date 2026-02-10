@@ -32,8 +32,8 @@ class find_object(Node):
         if img is None:
             return
 
-        flip = cv2.flip(img, 1)
-        blur = cv2.GaussianBlur(flip, (15, 15), 100)
+        # flip = cv2.flip(img, 1)
+        blur = cv2.GaussianBlur(img, (15, 15), 100)
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
         thresholded = cv2.inRange(hsv, BLUE_MIN, BLUE_MAX)
 
