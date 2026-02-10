@@ -48,7 +48,7 @@ class RotateRobot(Node):
         self.publisher_.publish(msg)
 
     def subscription_callback(self, msg):
-        if msg.z =! 0:
+        if msg.z != 0:
             self.point_msg = None
         else:
             self.point_msg = msg
