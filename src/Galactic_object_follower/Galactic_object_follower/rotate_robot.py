@@ -13,7 +13,7 @@ class RotateRobot(Node):
         super().__init__('minimal_publisher')
         self.declare_parameter('publish_frequency', 20)
         self.declare_parameter('pixel_width', 320)
-        self.declare_parameter('kp', 0.01)
+        self.declare_parameter('kp', 0.015)
         self.kp = self.get_parameter('kp').value
 
         # set up publisher
@@ -48,7 +48,10 @@ class RotateRobot(Node):
         self.publisher_.publish(msg)
 
     def subscription_callback(self, msg):
-        self.point_msg = msg
+        if msg.z =! 0:
+            self.point_msg = None
+        else:
+            self.point_msg = msg
 
 
 def main(args=None):
