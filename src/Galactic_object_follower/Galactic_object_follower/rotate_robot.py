@@ -1,3 +1,8 @@
+"""
+Lab 2 - Object Follower
+Author: Griffin Martin & Poorvaja Veera Balaji Kumar
+"""
+
 import rclpy
 from rclpy.node import Node
 
