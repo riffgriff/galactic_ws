@@ -15,14 +15,16 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoS
 
 waypoint_path = Path(__file__).with_name('wayPoints.txt')
 
-if waypoint_path.exists():
-    goals = np.atleast_2d(np.loadtxt(waypoint_path, dtype=float))
-    rclpy.logging.get_logger('go_to_goal').info(f'Loaded waypoints from {waypoint_path}: {goals.tolist()}')
-else:
-    goals = np.empty((0, 2), dtype=float)
-    rclpy.logging.get_logger('go_to_goal').warning(
-        f'Waypoint file {waypoint_path} does not exist. No goals will be published.'
-    )
+# if waypoint_path.exists():
+#     goals = np.atleast_2d(np.loadtxt(waypoint_path, dtype=float))
+#     rclpy.logging.get_logger('go_to_goal').info(f'Loaded waypoints from {waypoint_path}: {goals.tolist()}')
+# else:
+#     goals = np.empty((0, 2), dtype=float)
+#     rclpy.logging.get_logger('go_to_goal').warning(
+#         f'Waypoint file {waypoint_path} does not exist. No goals will be published.'
+#     )
+
+goals = np.array([[1.5, 0], [1.5, 1.4], [0, 1.4]])
 
 class GoToGoal(Node):
     def __init__(self):
