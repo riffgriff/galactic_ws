@@ -24,7 +24,7 @@ def generate_launch_description():
                 {'kp_t' : 0.5},
                 {'ki_t' : 0.0},
                 {'kd_t' : 0.0},
-                {'kp_obj' : 0.1},
+                {'kp_obj' : 0.5},
                 {'ki_obj' : 0.0},
                 {'kd_obj' : 0.0},
                 {'kp_pivot' : 1.5},
