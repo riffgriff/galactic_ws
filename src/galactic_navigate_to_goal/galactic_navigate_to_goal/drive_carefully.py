@@ -172,7 +172,7 @@ class DriveCarefully(Node):
         elif self.pivoting:
             rclpy.logging.get_logger('drive_carefully').info('In state 2 - pivoting')
 
-            ang_err = 0
+            ang_err = 0.0
             if self.object_on_left:
                ang_err = math.pi/2 - obj_ang
             else:
@@ -186,7 +186,7 @@ class DriveCarefully(Node):
             else:
                 # keep pivoting
                 angle_effort = self.pivot_controller.get_effort(ang_err)
-                dist_effort = 0
+                dist_effort = 0.0
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
