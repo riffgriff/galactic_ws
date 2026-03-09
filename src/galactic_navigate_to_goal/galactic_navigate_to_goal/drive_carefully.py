@@ -178,9 +178,9 @@ class DriveCarefully(Node):
 
             ang_err = 0
             if self.object_on_left:
-               ang_err = obj_ang - math.pi/2
+                    ang_err = wrap_angle(obj_ang - math.pi/2)
             else:
-               ang_err = obj_ang + math.pi/2
+                    ang_err = wrap_angle(obj_ang + math.pi/2)
             
             if abs(ang_err) < self.pivot_threshold:
                 # close enough to perpendicular - initiate the near-object avoidance
@@ -253,6 +253,10 @@ def cart_to_polar(x, y):
     r = math.sqrt(pow(x,2) + pow(y,2))
     theta = math.atan2(y, x)
     return r, theta
+
+def wrap_angle(angle):
+    # normalize angle to [-pi, pi]
+    return math.atan2(math.sin(angle), math.cos(angle))
 
 def main(args=None):
     rclpy.init(args=args)
