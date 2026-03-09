@@ -158,9 +158,17 @@ class DriveCarefully(Node):
                 self.direct_controller_t.reset()
                 self.near_object = False
             else:
+                # update side from current bearing so turn sign does not go stale
+                side_deadband = math.radians(2.0)
+                if obj_ang > side_deadband:
+                    self.object_on_left = True
+                elif obj_ang < -side_deadband:
+                    self.object_on_left = False
+
                 # side of object decides sign of PID
                 PID_sign = 1
-                if self.object_on_left: PID_sign = -1
+                if self.object_on_left:
+                    PID_sign = -1
 
                 # PID to stay a certain distance from the object
                 err = self.avoidance_dist_threshold - obj_r
