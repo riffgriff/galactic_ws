@@ -148,9 +148,11 @@ class DriveCarefully(Node):
         if self.near_object:
             rclpy.logging.get_logger('drive_carefully').info('In state 1 - avoiding object')
 
-            # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object
-            if (self.object_on_left and goal_ang < -self.avoidance_angular_threshold and goal_ang > -math.pi/2) or \
-               (not self.object_on_left and goal_ang > self.avoidance_angular_threshold and goal_ang < math.pi/2):
+            # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object 
+            # AND robot is further than the object than dist - epsilon/2
+            if ((self.object_on_left and goal_ang < -self.avoidance_angular_threshold and goal_ang > -math.pi/2) or \
+               (not self.object_on_left and goal_ang > self.avoidance_angular_threshold and goal_ang < math.pi/2)) and \
+                (obj_r > self.avoidance_dist_threshold - self.avoidance_dist_epsilon/2):
                 # clear out the old terms from the direct controller
                 self.direct_controller_r.reset()
                 self.direct_controller_t.reset()
