@@ -172,7 +172,7 @@ class DriveCarefully(Node):
         elif self.pivoting:
             rclpy.logging.get_logger('drive_carefully').info('In state 2 - pivoting')
 
-            ang_err = 0.0
+            ang_err = 0
             if self.object_on_left:
                ang_err = math.pi/2 - obj_ang
             else:
