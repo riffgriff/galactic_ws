@@ -139,8 +139,8 @@ class DriveCarefully(Node):
 
         goal_r, goal_ang = cart_to_polar(self.goal_x, self.goal_y)
         obj_r, obj_ang = cart_to_polar(self.obj_x, self.obj_y)
-        angle_effort = 0
-        dist_effort = 0
+        angle_effort = 0.0
+        dist_effort = 0.0
 
         ### state machine ###
 
