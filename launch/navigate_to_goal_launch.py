@@ -30,7 +30,8 @@ def generate_launch_description():
                 {'kp_pivot' : 0.3},
                 {'ki_pivot' : 0.0},
                 {'kd_pivot' : 0.0},
-                {'avoidance_dist_threshold' : 0.4},
+                {'avoidance_dist_threshold' : 0.5},
+                {'avoidance_dist_epsilon' : 0.2}
             ]
         ),
     ])
