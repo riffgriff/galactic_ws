@@ -23,6 +23,7 @@ class DriveCarefully(Node):
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
+        self.declare_parameter('avoidance_obj_ang_weight', 0.6)
         self.declare_parameter('max_speed_r', 1.5)
         self.declare_parameter('max_speed_t', 0.1)
         # rotational PID constants
@@ -63,6 +64,7 @@ class DriveCarefully(Node):
         self.avoidance_dist_epsilon = self.get_parameter('avoidance_dist_epsilon').value
         self.avoidance_angular_threshold = math.pi*self.get_parameter('avoidance_angular_threshold').value/180.0 # in radians
         self.avoidance_speed = self.get_parameter('avoidance_speed').value
+        self.avoidance_obj_ang_weight = self.get_parameter('avoidance_obj_ang_weight').value
         self.pivot_threshold = math.pi*self.get_parameter('pivot_threshold').value/180.0 # in radians
         #endregion
 
@@ -172,7 +174,14 @@ class DriveCarefully(Node):
 
                 # PID to stay a certain distance from the object
                 err = self.avoidance_dist_threshold - obj_r
-                angle_effort = PID_sign*self.avoidance_controller.get_effort(err)
+                dist_hold_effort = PID_sign*self.avoidance_controller.get_effort(err)
+
+                # keep object around +/- 90 deg while avoiding (left:+90, right:-90)
+                desired_obj_ang = math.pi/2 if self.object_on_left else -math.pi/2
+                obj_ang_err = wrap_angle(obj_ang - desired_obj_ang)
+                bearing_effort = self.avoidance_obj_ang_weight*obj_ang_err
+
+                angle_effort = dist_hold_effort + bearing_effort
                 dist_effort = self.avoidance_speed
 
         
