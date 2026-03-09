@@ -11,20 +11,17 @@ from geometry_msgs.msg import Vector3
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
+from ament_index_python.packages import get_package_share_directory
 
 
-waypoint_path = Path(__file__).with_name('wayPoints.txt')
-
-# if waypoint_path.exists():
-#     goals = np.atleast_2d(np.loadtxt(waypoint_path, dtype=float))
-#     rclpy.logging.get_logger('go_to_goal').info(f'Loaded waypoints from {waypoint_path}: {goals.tolist()}')
-# else:
-#     goals = np.empty((0, 2), dtype=float)
-#     rclpy.logging.get_logger('go_to_goal').warning(
-#         f'Waypoint file {waypoint_path} does not exist. No goals will be published.'
-#     )
-
-goals = np.array([[1.5, 0], [1.5, 1.4], [0, 1.4]])
+waypoint_path = Path(get_package_share_directory('galactic_navigate_to_goal')) / 'wayPoints.txt'
+if not waypoint_path.exists():
+    rclpy.logging.get_logger('go_to_goal').warning(
+        f'Could not locate waypoint file at {waypoint_path}. Using default goals.'
+    )
+    goals = np.array([[1.5, 0], [1.5, 1.4], [0, 1.4]])
+else:
+    goals = np.atleast_2d(np.loadtxt(waypoint_path, dtype=float))
 
 class GoToGoal(Node):
     def __init__(self):
