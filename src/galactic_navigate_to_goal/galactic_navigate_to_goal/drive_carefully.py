@@ -176,21 +176,22 @@ class DriveCarefully(Node):
                 # no object close - exit the pivot
                 self.pivoting = False
 
-            ang_err = 0
-            if self.object_on_left:
-                    ang_err = wrap_angle(obj_ang - math.pi/2)
             else:
-                    ang_err = wrap_angle(obj_ang + math.pi/2)
-            
-            if abs(ang_err) < self.pivot_threshold:
-                # close enough to perpendicular - initiate the near-object avoidance
-                self.near_object = True
-                self.pivoting = False
-                self.avoidance_controller.reset()
-            else:
-                # keep pivoting
-                angle_effort = self.pivot_controller.get_effort(ang_err)
-                dist_effort = 0.0
+                ang_err = 0
+                if self.object_on_left:
+                        ang_err = wrap_angle(obj_ang - math.pi/2)
+                else:
+                        ang_err = wrap_angle(obj_ang + math.pi/2)
+                
+                if abs(ang_err) < self.pivot_threshold:
+                    # close enough to perpendicular - initiate the near-object avoidance
+                    self.near_object = True
+                    self.pivoting = False
+                    self.avoidance_controller.reset()
+                else:
+                    # keep pivoting
+                    angle_effort = self.pivot_controller.get_effort(ang_err)
+                    dist_effort = 0.0
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
