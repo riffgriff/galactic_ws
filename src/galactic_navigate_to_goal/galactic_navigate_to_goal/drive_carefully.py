@@ -152,7 +152,7 @@ class DriveCarefully(Node):
 
             # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object
             if (self.object_on_left and goal_ang < -self.avoidance_angular_threshold and goal_ang > -math.pi/2) or \
-               (self.object_on_right and goal_ang > self.avoidance_angular_threshold and goal_ang < math.pi/2):
+               (not self.object_on_left and goal_ang > self.avoidance_angular_threshold and goal_ang < math.pi/2):
                 # clear out the old terms from the direct controller
                 self.direct_controller_r.reset()
                 self.direct_controller_t.reset()
@@ -236,7 +236,7 @@ class PID_controller:
 
     def get_effort(self, error):
         self.error_sum += error
-        output = -self.kp*error - self.ki*self.error_sum*self.period - self.kd*(error-self.prev_error)/self.period
+        output = self.kp*error + self.ki*self.error_sum*self.period + self.kd*(error-self.prev_error)/self.period
         self.prev_error = error
         return output
     
