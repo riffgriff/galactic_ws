@@ -24,6 +24,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'go_to_goal=galactic_navigate_to_goal.go_to_goal:main',
+            'drive_carefully=galactic_navigate_to_goal.drive_carefully:main',
+            'get_object_range=galactic_navigate_to_goal.get_object_range:main',
         ],
     },
 )
