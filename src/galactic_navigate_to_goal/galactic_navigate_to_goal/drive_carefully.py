@@ -159,8 +159,8 @@ class DriveCarefully(Node):
                 self.near_object = False
             else:
                 # side of object decides sign of PID
-                PID_sign = -1
-                if self.object_on_left: PID_sign = 1
+                PID_sign = 1
+                if self.object_on_left: PID_sign = -1
 
                 # PID to stay a certain distance from the object
                 err = self.avoidance_dist_threshold - obj_r
@@ -171,6 +171,10 @@ class DriveCarefully(Node):
         # case 2 - recently encountered object - check if pivoted enough, continue pivoting if not
         elif self.pivoting:
             rclpy.logging.get_logger('drive_carefully').info('In state 2 - pivoting')
+
+            if obj_r > self.avoidance_dist_threshold + self.avoidance_dist_epsilon:
+                # no object close - exit the pivot
+                self.pivoting = False
 
             ang_err = 0
             if self.object_on_left:
