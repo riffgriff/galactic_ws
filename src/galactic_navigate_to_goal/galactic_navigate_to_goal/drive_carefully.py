@@ -194,7 +194,7 @@ class DriveCarefully(Node):
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
-        elif obj_r <= self.avoidance_dist_threshold - self.avoidance_dist_epsilon: # ADD SAUCIER LOGIC HERE
+        elif obj_r <= self.avoidance_dist_threshold:
             rclpy.logging.get_logger('drive_carefully').info('In state 3 - intializing pivot')
 
             self.pivoting = True
