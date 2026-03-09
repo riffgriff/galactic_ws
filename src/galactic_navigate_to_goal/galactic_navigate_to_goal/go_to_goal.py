@@ -17,6 +17,7 @@ waypoint_path = Path(__file__).with_name('wayPoints.txt')
 
 if waypoint_path.exists():
     goals = np.atleast_2d(np.loadtxt(waypoint_path, dtype=float))
+    rclpy.logging.get_logger('go_to_goal').info(f'Loaded waypoints from {waypoint_path}: {goals.tolist()}')
 else:
     goals = np.empty((0, 2), dtype=float)
 
