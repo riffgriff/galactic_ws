@@ -157,8 +157,8 @@ class DriveCarefully(Node):
                 self.near_object = False
             else:
                 # side of object decides sign of PID
-                PID_sign = 1
-                if self.object_on_left: PID_sign = -1
+                PID_sign = -1
+                if self.object_on_left: PID_sign = 1
 
                 # PID to stay a certain distance from the object
                 err = self.avoidance_dist_threshold - obj_r
