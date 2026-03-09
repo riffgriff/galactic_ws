@@ -20,6 +20,9 @@ if waypoint_path.exists():
     rclpy.logging.get_logger('go_to_goal').info(f'Loaded waypoints from {waypoint_path}: {goals.tolist()}')
 else:
     goals = np.empty((0, 2), dtype=float)
+    rclpy.logging.get_logger('go_to_goal').warning(
+        f'Waypoint file {waypoint_path} does not exist. No goals will be published.'
+    )
 
 class GoToGoal(Node):
     def __init__(self):
