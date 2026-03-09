@@ -23,7 +23,6 @@ class DriveCarefully(Node):
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
-        self.declare_parameter('distance_setpoint', 0.2) # in m
         self.declare_parameter('max_speed_r', 1.5)
         self.declare_parameter('max_speed_t', 0.1)
         # rotational PID constants
@@ -58,7 +57,6 @@ class DriveCarefully(Node):
         kd_pivot = self.get_parameter('kd_pivot').value
         
         publish_period = 1/self.get_parameter('publish_frequency').value
-        self.setpoint_t = self.get_parameter('distance_setpoint').value
         self.max_speed_r = self.get_parameter('max_speed_r').value
         self.max_speed_t = self.get_parameter('max_speed_t').value
         self.avoidance_dist_threshold = self.get_parameter('avoidance_dist_threshold').value
