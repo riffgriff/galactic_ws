@@ -22,6 +22,7 @@ class DriveCarefully(Node):
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
+        self.declare_parameter('distance_setpoint', 0.2) # in m
         self.declare_parameter('max_speed_r', 1.5)
         self.declare_parameter('max_speed_t', 0.1)
         # rotational PID constants
