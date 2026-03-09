@@ -174,9 +174,9 @@ class DriveCarefully(Node):
 
             ang_err = 0
             if self.object_on_left:
-               ang_err = math.pi/2 - obj_ang
-            else:
                ang_err = -math.pi/2 - obj_ang
+            else:
+               ang_err = math.pi/2 - obj_ang
             
             if abs(ang_err) < self.pivot_threshold:
                 # close enough to perpendicular - initiate the near-object avoidance
