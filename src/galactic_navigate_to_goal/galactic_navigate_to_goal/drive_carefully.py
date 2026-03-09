@@ -18,7 +18,8 @@ class DriveCarefully(Node):
         super().__init__('minimal_publisher')
         #region parameter handling
         self.declare_parameter('publish_frequency', 5) # in Hz
-        self.declare_parameter('avoidance_dist_threshold', 0.2) # in meters
+        self.declare_parameter('avoidance_dist_threshold', 0.3) # in meters
+        self.declare_parameter('avoidance_dist_epsilon', 0.1) # in meters
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
@@ -61,6 +62,7 @@ class DriveCarefully(Node):
         self.max_speed_r = self.get_parameter('max_speed_r').value
         self.max_speed_t = self.get_parameter('max_speed_t').value
         self.avoidance_dist_threshold = self.get_parameter('avoidance_dist_threshold').value
+        self.avoidance_dist_epsilon = self.get_parameter('avoidance_dist_epsilon').value
         self.avoidance_angular_threshold = math.pi*self.get_parameter('avoidance_angular_threshold').value/180.0 # in radians
         self.avoidance_speed = self.get_parameter('avoidance_speed').value
         self.pivot_threshold = self.get_parameter('pivot_threshold').value
@@ -146,6 +148,7 @@ class DriveCarefully(Node):
 
         # case 1 - recently pivoted - check if safe, continue to go around if not
         if self.near_object:
+            rclpy.logging.get_logger('drive_carefully').info('In state 1 - avoiding object')
 
             # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object
             if (self.object_on_left and goal_ang < -self.avoidance_angular_threshold and goal_ang > -math.pi/2) or \
@@ -167,6 +170,8 @@ class DriveCarefully(Node):
         
         # case 2 - recently encountered object - check if pivoted enough, continue pivoting if not
         elif self.pivoting:
+            rclpy.logging.get_logger('drive_carefully').info('In state 2 - pivoting')
+
             ang_err = 0
             if self.object_on_left:
                ang_err = math.pi/2 - obj_ang
@@ -185,7 +190,9 @@ class DriveCarefully(Node):
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
-        elif obj_r <= self.avoidance_dist_threshold: # ADD SAUCIER LOGIC HERE
+        elif obj_r <= self.avoidance_dist_threshold - self.avoidance_dist_epsilon: # ADD SAUCIER LOGIC HERE
+            rclpy.logging.get_logger('drive_carefully').info('In state 3 - intializing pivot')
+
             self.pivoting = True
             self.object_on_left = obj_ang > 0
             # clear out the pivot controller
@@ -193,6 +200,7 @@ class DriveCarefully(Node):
 
         # case 4 - no object close enough, proceed directly to goal
         else:
+            rclpy.logging.get_logger('drive_carefully').info('In state 4 - proceeding to goal')
             angle_effort = self.direct_controller_r.get_effort(goal_ang)
             dist_effort = self.direct_controller_t.get_effort(goal_r)
         
