@@ -193,9 +193,13 @@ class DriveCarefully(Node):
                 
                 if abs(ang_err) < self.pivot_threshold:
                     # close enough to perpendicular - initiate the near-object avoidance
-                    self.near_object = True
+                    # self.near_object = True
+                    # self.pivoting = False
+                    # self.avoidance_controller.reset()
                     self.pivoting = False
-                    self.avoidance_controller.reset()
+                    self.near_object = False
+                    self.direct_controller_r.reset()
+                    self.direct_controller_t.reset()
                 else:
                     # keep pivoting
                     angle_effort = self.pivot_controller.get_effort(ang_err)
