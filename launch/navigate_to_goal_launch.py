@@ -26,12 +26,12 @@ def generate_launch_description():
                 {'kd_t' : 0.0},
                 {'kp_obj' : 0.8},
                 {'ki_obj' : 0.0},
-                {'kd_obj' : 0.5},
+                {'kd_obj' : 0.3},
                 {'kp_pivot' : 1.5},
                 {'ki_pivot' : 0.0},
                 {'kd_pivot' : 0.0},
-                {'avoidance_dist_threshold' : 0.4},
-                {'avoidance_dist_epsilon' : 0.1}
+                {'avoidance_dist_threshold' : 0.3},
+                {'avoidance_dist_epsilon' : 0.05}
             ]
         ),
     ])

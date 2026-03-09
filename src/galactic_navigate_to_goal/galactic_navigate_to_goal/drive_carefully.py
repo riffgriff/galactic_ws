@@ -18,8 +18,8 @@ class DriveCarefully(Node):
         super().__init__('minimal_publisher')
         #region parameter handling
         self.declare_parameter('publish_frequency', 5) # in Hz
-        self.declare_parameter('avoidance_dist_threshold', 0.4) # in meters
-        self.declare_parameter('avoidance_dist_epsilon', 0.08) # in meters
+        self.declare_parameter('avoidance_dist_threshold', 0.3) # in meters
+        self.declare_parameter('avoidance_dist_epsilon', 0.05) # in meters
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
@@ -194,7 +194,7 @@ class DriveCarefully(Node):
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
-        elif obj_r <= self.avoidance_dist_threshold:
+        elif obj_r <= self.avoidance_dist_threshold - self.avoidance_dist_epsilon:
             rclpy.logging.get_logger('drive_carefully').info('In state 3 - intializing pivot')
 
             self.pivoting = True
