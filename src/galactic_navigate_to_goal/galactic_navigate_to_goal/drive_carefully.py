@@ -65,7 +65,7 @@ class DriveCarefully(Node):
         self.avoidance_dist_epsilon = self.get_parameter('avoidance_dist_epsilon').value
         self.avoidance_angular_threshold = math.pi*self.get_parameter('avoidance_angular_threshold').value/180.0 # in radians
         self.avoidance_speed = self.get_parameter('avoidance_speed').value
-        self.pivot_threshold = self.get_parameter('pivot_threshold').value
+        self.pivot_threshold = math.pi*self.get_parameter('pivot_threshold').value/180.0 # in radians
         #endregion
 
         # set up PID controllers
