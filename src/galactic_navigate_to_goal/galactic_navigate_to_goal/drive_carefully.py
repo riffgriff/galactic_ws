@@ -152,7 +152,7 @@ class DriveCarefully(Node):
             # AND robot is further than the object than dist - epsilon/2
             if ((self.object_on_left and goal_ang < -self.avoidance_angular_threshold and goal_ang > -math.pi/2) or \
                (not self.object_on_left and goal_ang > self.avoidance_angular_threshold and goal_ang < math.pi/2)) and \
-                (obj_r > self.avoidance_dist_threshold - self.avoidance_dist_epsilon/2):
+                (obj_r > self.avoidance_dist_threshold - self.avoidance_dist_epsilon):
                 # clear out the old terms from the direct controller
                 self.direct_controller_r.reset()
                 self.direct_controller_t.reset()
