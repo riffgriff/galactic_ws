@@ -18,8 +18,8 @@ class DriveCarefully(Node):
         super().__init__('minimal_publisher')
         #region parameter handling
         self.declare_parameter('publish_frequency', 5) # in Hz
-        self.declare_parameter('avoidance_dist_threshold', 0.25) # in meters
-        self.declare_parameter('avoidance_dist_epsilon', 0.1) # in meters
+        self.declare_parameter('avoidance_dist_threshold', 0.4) # in meters
+        self.declare_parameter('avoidance_dist_epsilon', 0.08) # in meters
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
