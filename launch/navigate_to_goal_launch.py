@@ -33,7 +33,6 @@ def generate_launch_description():
                 {'avoidance_dist_threshold' : 0.2},
                 {'avoidance_dist_epsilon' : 0.04},
                 {'lidar_axle_offset' : 0.03},
-                {'max_speed_t' : 0.15}
             ]
         ),
     ])
