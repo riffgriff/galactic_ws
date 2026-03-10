@@ -12,7 +12,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Point
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
 from ament_index_python.packages import get_package_share_directory
-
+import time
 
 waypoint_path = Path(get_package_share_directory('galactic_navigate_to_goal')) / 'wayPoints.txt'
 if not waypoint_path.exists():
@@ -27,7 +27,7 @@ class GoToGoal(Node):
     def __init__(self):
         super().__init__('go_to_goal')
         self.declare_parameter('publish_frequency', 20)
-        self.declare_parameter('goal_tolerance', 0.05)
+        self.declare_parameter('goal_tolerance', 0.01)
 
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -65,6 +65,7 @@ class GoToGoal(Node):
             goal_tolerance = float(self.get_parameter('goal_tolerance').value)
 
             if goal_distance <= goal_tolerance:
+                time.sleep(10)
                 self.current_goal_index += 1
                 if self.current_goal_index >= goals.shape[0]:
                     self.all_goals_reached = True
