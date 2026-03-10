@@ -32,7 +32,7 @@ def generate_launch_description():
                 {'kd_pivot' : 0.0},
                 {'avoidance_dist_threshold' : 0.2},
                 {'avoidance_dist_epsilon' : 0.04},
-                {'lidar_axle_offset' : 0.03}
+                {'lidar_axle_offset' : 0.03},
             ]
         ),
     ])
