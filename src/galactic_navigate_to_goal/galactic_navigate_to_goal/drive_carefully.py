@@ -148,8 +148,14 @@ class DriveCarefully(Node):
 
         ### state machine ###
 
+        # case 0 - extension of case 4 - if robot is closer to goal than object, proceed direct to goal
+        if goal_r < obj_r:
+            rclpy.logging.get_logger('drive_carefully').info('In state 0 - close to goal')
+            angle_effort = self.direct_controller_r.get_effort(goal_ang)
+            dist_effort = self.direct_controller_t.get_effort(goal_r)
+
         # case 1 - recently pivoted - check if safe, continue to go around if not
-        if self.near_object:
+        elif self.near_object:
             rclpy.logging.get_logger('drive_carefully').info('In state 1 - avoiding object')
 
             # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object 
