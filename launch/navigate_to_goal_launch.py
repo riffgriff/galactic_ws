@@ -31,7 +31,8 @@ def generate_launch_description():
                 {'ki_pivot' : 0.0},
                 {'kd_pivot' : 0.0},
                 {'avoidance_dist_threshold' : 0.3},
-                {'avoidance_dist_epsilon' : 0.05}
+                {'avoidance_dist_epsilon' : 0.05},
+                {'lidar_axle_offset' : 0.03}
             ]
         ),
     ])
