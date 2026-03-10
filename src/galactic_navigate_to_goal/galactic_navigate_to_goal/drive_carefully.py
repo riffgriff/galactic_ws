@@ -100,6 +100,7 @@ class DriveCarefully(Node):
         self.pivoting = False
         self.object_on_left = True
         self.cycles_without_lidar = 0
+        self.debug_cycle_count = 0
 
     def goal_callback(self, msg):
         if msg.z != 0:
@@ -141,6 +142,11 @@ class DriveCarefully(Node):
 
         goal_r, goal_ang = cart_to_polar(self.goal_x, self.goal_y)
         obj_r, obj_ang = cart_to_polar(self.obj_x, self.obj_y)
+
+        self.debug_cycle_count += 1
+        if self.debug_cycle_count % 5 == 0:
+            self.get_logger().info(f'obj_r={obj_r:.3f}, obj_ang={obj_ang:.3f}')
+
         angle_effort = 0.0
         dist_effort = 0.0
 
