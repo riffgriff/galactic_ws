@@ -65,7 +65,14 @@ class GoToGoal(Node):
             goal_tolerance = float(self.get_parameter('goal_tolerance').value)
 
             if goal_distance <= goal_tolerance:
-                time.sleep(10)
+                start = time.time()
+                while time.time() - start < 10:  # wait for 10 seconds at the goal
+                    msg.x = 0.0
+                    msg.y = 0.0
+                    msg.z = 0.0
+                    self.publisher_.publish(msg)
+                    time.sleep(0.1)
+                    
                 self.current_goal_index += 1
                 if self.current_goal_index >= goals.shape[0]:
                     self.all_goals_reached = True
