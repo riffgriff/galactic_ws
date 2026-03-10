@@ -160,13 +160,6 @@ class DriveCarefully(Node):
                 self.direct_controller_t.reset()
                 self.near_object = False
             else:
-                # update side from current bearing so turn sign does not go stale
-                side_deadband = math.radians(2.0)
-                if obj_ang > side_deadband:
-                    self.object_on_left = True
-                elif obj_ang < -side_deadband:
-                    self.object_on_left = False
-
                 # side of object decides sign of PID
                 PID_sign = 1
                 if self.object_on_left:
@@ -212,8 +205,8 @@ class DriveCarefully(Node):
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
-        elif obj_r <= self.avoidance_dist_threshold - self.avoidance_dist_epsilon:
-            rclpy.logging.get_logger('drive_carefully').info('In state 3 - intializing pivot')
+        elif obj_r <= self.avoidance_dist_threshold:
+            rclpy.logging.get_logger('drive_carefully').info('In state 3 - initializing pivot')
 
             self.pivoting = True
             self.object_on_left = obj_ang > 0
