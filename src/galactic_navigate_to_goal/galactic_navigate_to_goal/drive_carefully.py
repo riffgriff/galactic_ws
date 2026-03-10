@@ -154,8 +154,12 @@ class DriveCarefully(Node):
 
         ### state machine ###
 
+        # case -1 - arrived at goal
+        if goal_r == 0.0:
+            rclpy.logging.get_logger('drive_carefully').info('In state -1 - arrived at goal')
+
         # case 0 - extension of case 4 - if robot is closer to goal than object or no lidar data, proceed direct to goal
-        if goal_r < obj_r or obj_r == 0.0:
+        elif goal_r < obj_r or obj_r == 0.0:
             rclpy.logging.get_logger('drive_carefully').info('In state 0 - close to goal')
             angle_effort = self.direct_controller_r.get_effort(goal_ang)
             dist_effort = self.direct_controller_t.get_effort(goal_r)
