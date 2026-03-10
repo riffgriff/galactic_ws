@@ -21,6 +21,7 @@ class DriveCarefully(Node):
         self.declare_parameter('avoidance_dist_threshold', 0.3) # in meters
         self.declare_parameter('avoidance_dist_epsilon', 0.05) # in meters
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
+        self.declare_parameter('lidar_axle_offset', 0.02) # in meters
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
         self.declare_parameter('avoidance_obj_ang_weight', 0.6)
@@ -66,6 +67,7 @@ class DriveCarefully(Node):
         self.avoidance_speed = self.get_parameter('avoidance_speed').value
         self.avoidance_obj_ang_weight = self.get_parameter('avoidance_obj_ang_weight').value
         self.pivot_threshold = math.pi*self.get_parameter('pivot_threshold').value/180.0 # in radians
+        self.lidar_axle_offset = self.get_parameter('lidar_axle_offset').value
         #endregion
 
         # set up PID controllers
@@ -152,8 +154,14 @@ class DriveCarefully(Node):
 
         ### state machine ###
 
+        # case 0 - extension of case 4 - if robot is closer to goal than object, proceed direct to goal
+        if goal_r < obj_r:
+            rclpy.logging.get_logger('drive_carefully').info('In state 0 - close to goal')
+            angle_effort = self.direct_controller_r.get_effort(goal_ang)
+            dist_effort = self.direct_controller_t.get_effort(goal_r)
+
         # case 1 - recently pivoted - check if safe, continue to go around if not
-        if self.near_object:
+        elif self.near_object:
             rclpy.logging.get_logger('drive_carefully').info('In state 1 - avoiding object')
 
             # check if safe - goal is in a window from avoidance_angular_threshold to 90 degrees outward of object 
@@ -211,7 +219,7 @@ class DriveCarefully(Node):
 
         # case 3 - newly detected object in driving field - start pivoting to perpendicular the LIDAR vector
         # add some logic here to figure out which objects in front of the robot we care about? What defines in front of?
-        elif obj_r <= self.avoidance_dist_threshold:
+        elif obj_r <= self.avoidance_dist_threshold + self.lidar_axle_offset:
             rclpy.logging.get_logger('drive_carefully').info('In state 3 - initializing pivot')
 
             self.pivoting = True
