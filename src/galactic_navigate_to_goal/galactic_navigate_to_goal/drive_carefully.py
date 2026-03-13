@@ -18,10 +18,10 @@ class DriveCarefully(Node):
         super().__init__('minimal_publisher')
         #region parameter handling
         self.declare_parameter('publish_frequency', 5) # in Hz
-        self.declare_parameter('avoidance_dist_threshold', 0.3) # in meters
-        self.declare_parameter('avoidance_dist_epsilon', 0.05) # in meters
+        self.declare_parameter('avoidance_dist_threshold', 0.2) # in meters
+        self.declare_parameter('avoidance_dist_epsilon', 0.04) # in meters
         self.declare_parameter('avoidance_angular_threshold', 15) # in degrees
-        self.declare_parameter('lidar_axle_offset', 0.02) # in meters
+        self.declare_parameter('lidar_axle_offset', 0.03) # in meters
         self.declare_parameter('pivot_threshold', 5) # in degrees
         self.declare_parameter('avoidance_speed', 0.05) # m/s
         self.declare_parameter('avoidance_obj_ang_weight', 0.6)
@@ -32,15 +32,15 @@ class DriveCarefully(Node):
         self.declare_parameter('ki_r', 0.0)
         self.declare_parameter('kd_r', 0.0)
         # translational PID constants
-        self.declare_parameter('kp_t', 0.5)
+        self.declare_parameter('kp_t', 1.0)
         self.declare_parameter('ki_t', 0.0)
         self.declare_parameter('kd_t', 0.0)
         # object avoidance PID constants
-        self.declare_parameter('kp_obj', 2.0)
-        self.declare_parameter('ki_obj', 0.0)
-        self.declare_parameter('kd_obj', 0.0)
+        self.declare_parameter('kp_obj', 1.3)
+        self.declare_parameter('ki_obj', 0.02)
+        self.declare_parameter('kd_obj', 0.2)
         # angle pivoting PID constants
-        self.declare_parameter('kp_pivot', 2.0)
+        self.declare_parameter('kp_pivot', 1.5)
         self.declare_parameter('ki_pivot', 0.0)
         self.declare_parameter('kd_pivot', 0.0)
 
