@@ -68,7 +68,7 @@ def train_model(data_path, train_lines, image_type, model_filename, save_model):
 
     original_images = list(cv2.imread(data_path+train_lines[i][0]+image_type) for i in range(len(train_lines)))
 
-    preprocessed_images = original_images
+    preprocessed_images = original_images # INSERT IMAGE PREPROCESSING HERE
 
     #This line reads in all images listed in the file in color, and resizes them to 25x33 pixels
     train = np.array([np.array(cv2.resize(img, (25,33))) for img in preprocessed_images])

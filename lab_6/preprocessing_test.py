@@ -13,7 +13,7 @@ image_center = (int(original_images[0].shape[0]/2), int(original_images[0].shape
 
 # tuneable parameters in this model:
 blur_size = 7 # gaussian blur kernel size
-close_kernel_size = 7 # kernel size for the closing operation
+close_kernel_size = 5 # kernel size for the closing operation
 avg_central_edge_size = 100 # expected size of the central object
 size_vs_location = 0.5 # weighting of size and location in object selection - 0 is all size, 1 is all location
 
@@ -49,9 +49,11 @@ for i, og_img in enumerate(original_images):
 
     final_images.append(og_img)
 
+# which image gets displayed in the windows
+im_to_show = 116
 
-im_to_show = 125
 cv2.imshow("Original", original_images[im_to_show])
+cv2.imshow("Edges", edge_masks[im_to_show])
 cv2.imshow("Final", final_images[im_to_show])
 cv2.waitKey(0)
 cv2.destroyAllWindows()
