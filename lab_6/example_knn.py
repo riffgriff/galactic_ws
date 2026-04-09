@@ -66,8 +66,12 @@ def train_model(data_path, train_lines, image_type, model_filename, save_model):
         knn (knn_model_object): The KNN model.
     """
 
+    original_images = list(cv2.imread(data_path+train_lines[i][0]+image_type) for i in range(len(train_lines)))
+
+    preprocessed_images = original_images
+
     #This line reads in all images listed in the file in color, and resizes them to 25x33 pixels
-    train = np.array([np.array(cv2.resize(cv2.imread(data_path+train_lines[i][0]+image_type),(25,33))) for i in range(len(train_lines))])
+    train = np.array([np.array(cv2.resize(img, (25,33))) for img in preprocessed_images])
 
     #Here we reshape each image into a long vector and ensure the data type is a float (which is what KNN wants), note the *3 is due to 3 channels of color.
     train_data = train.flatten().reshape(len(train_lines), 33*25*3)
