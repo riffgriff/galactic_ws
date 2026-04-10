@@ -7,6 +7,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_FeedbackMessage
+import time
 
 class WaypointNavigator(Node):
     def __init__(self):
@@ -28,10 +29,14 @@ class WaypointNavigator(Node):
         ]
 
         self.current_waypoint_index = 0
-        self.distance_threshold = 0.2
+        self.distance_threshold = 0.15
+        self.min_goal_age_sec = 0.5
         self.goal_sent = False
+        self.navigation_complete = False
+        self.goal_sent_time = None
 
-        self.timer = self.create_timer(1.0, self.timer_callback)
+        if self.waypoints:
+            self.send_goal(self.waypoints[self.current_waypoint_index])
 
     def send_goal(self, waypoint):
         msg = PoseStamped()
@@ -50,27 +55,35 @@ class WaypointNavigator(Node):
         self.publisher.publish(msg)
         self.get_logger().info(f'Sent waypoint {self.current_waypoint_index + 1}: {waypoint[:2]}')
         self.goal_sent = True
+        self.goal_sent_time = self.get_clock().now()
 
     def feedback_callback(self, msg):
-        distance = msg.feedback.distance_remaining
-        if distance:
-            self.get_logger().info(f'Distance remaining: {distance:.2f}m')
-        else:
+        if self.navigation_complete:
             return
+
+        distance = msg.feedback.distance_remaining
+        self.get_logger().info(f'Distance remaining: {distance:.2f}m')
+
+        if self.goal_sent_time is not None:
+            elapsed_time_sec = (
+                self.get_clock().now().nanoseconds - self.goal_sent_time.nanoseconds
+            ) / 1e9
+            if elapsed_time_sec < self.min_goal_age_sec and distance < self.distance_threshold:
+                return
 
         if distance < self.distance_threshold:
             self.get_logger().info(f'Waypoint {self.current_waypoint_index + 1} reached!')
+            start = time.time()
+            while time.time() - start < 10:  # wait for 10 seconds at the goal
+                time.sleep(0.1)
             self.current_waypoint_index += 1
-            self.goal_sent = False
 
-    def timer_callback(self):
-        if self.current_waypoint_index >= len(self.waypoints):
-            self.get_logger().info('All waypoints reached!')
-            self.timer.cancel()
-            return
-
-        if not self.goal_sent:
-            self.send_goal(self.waypoints[self.current_waypoint_index])
+            if self.current_waypoint_index < len(self.waypoints):
+                self.send_goal(self.waypoints[self.current_waypoint_index])
+            else:
+                self.get_logger().info('All waypoints reached!')
+                self.navigation_complete = True
+                self.goal_sent = False
 
 def main(args=None):
     rclpy.init(args=args)
