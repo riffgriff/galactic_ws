@@ -1,10 +1,11 @@
 import cv2
+from pathlib import Path
 
-imgs_base_path = r"C:\Users\griff\OneDrive\Desktop\Spring 26\Intro to Robotics\galactic_ws\lab_6\2026S_imgs\\"
+imgs_base_path = Path(__file__).resolve().parent / "2026S_imgs"
 total_images = 153
 image_type = ".png"
 
-original_images = list(cv2.imread(f"{imgs_base_path}{i:03d}{image_type}") for i in range(total_images))
+original_images = list(cv2.imread(str(imgs_base_path / f"{i:03d}{image_type}")) for i in range(total_images))
 edge_masks = list()
 final_images = list()
 
