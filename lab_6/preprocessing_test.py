@@ -1,5 +1,6 @@
 import cv2
 from pathlib import Path
+import random
 
 def preprocess_image(
     image,
@@ -75,10 +76,13 @@ for i, og_img in enumerate(original_images):
     final_images.append(og_img)
 
 # which image gets displayed in the windows
-im_to_show = 150
+im_to_show = 0
 
-cv2.imshow("Original", original_images[im_to_show])
-cv2.imshow("Edges", edge_masks[im_to_show])
-cv2.imshow("Final", final_images[im_to_show])
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+while im_to_show < 152:
+    cv2.imshow("Original", original_images[im_to_show])
+    cv2.imshow("Edges", edge_masks[im_to_show])
+    cv2.imshow("Final", final_images[im_to_show])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    im_to_show += random.randint(1,20)
