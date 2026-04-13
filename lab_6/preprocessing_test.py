@@ -1,6 +1,7 @@
 import cv2
 from pathlib import Path
 import random
+import math
 
 def preprocess_image(
     image,
@@ -10,16 +11,15 @@ def preprocess_image(
     dilate_iterations=1,
     close_kernel_size=3,
 ):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (blur_size, blur_size), sigmaX=0, sigmaY=0)
-    img = cv2.Canny(gray, threshold1=canny_threshold1, threshold2=canny_threshold2)
+    blur = cv2.GaussianBlur(image, (blur_size, blur_size), sigmaX=0, sigmaY=0)
+    img = cv2.Canny(blur, threshold1=canny_threshold1, threshold2=canny_threshold2)
     
     # Strengthen edges with light dilation
     if dilate_iterations > 0:
         dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
         img = cv2.dilate(img, dilate_kernel, iterations=dilate_iterations)
     
-    close_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (close_kernel_size, close_kernel_size))
+    close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_kernel_size, close_kernel_size))
     img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, close_kernel)
     
     return img
@@ -33,18 +33,27 @@ edge_masks = list()
 final_images = list()
 
 # get the center pixel of the image
-image_center = (int(original_images[0].shape[0]/2), int(original_images[0].shape[1]/2))
+image_center = (int(original_images[0].shape[1]/2), int(original_images[0].shape[0]/2))
 
 # tuneable parameters in this model:
 blur_size = 7 # gaussian blur kernel size
 canny_threshold1 = 20 # lower Canny threshold (catches more edges)
-canny_threshold2 = 70 # upper Canny threshold
+canny_threshold2 = 50 # upper Canny threshold
 dilate_iterations = 1 # dilate edges to strengthen them
 close_kernel_size = 3 # kernel size for closing operation
-avg_central_edge_size = 100 # expected size of the central object
-size_vs_location = 0.5 # weighting of size and location in object selection - 0 is all size, 1 is all location
+avg_central_edge_size = 1200 # expected size of the central object
+min_central_edge_size = 400 # minimum size of central object
+size_vs_location = 0.95 # weighting of size and location in object selection - 0 is all size, 1 is all location
 
-for i, og_img in enumerate(original_images):
+# for i, og_img in enumerate(original_images):
+img_num = 0
+i = 0
+while img_num < 150:
+    img_num += random.randint(1,20)
+    og_img = original_images[img_num]
+
+    # the goods start here
+
     img = preprocess_image(
         og_img,
         blur_size=blur_size,
@@ -57,32 +66,58 @@ for i, og_img in enumerate(original_images):
     edge_masks.append(img)
 
     # find which connected edge is large and in the center
+    # lower score is better
     total_edges, output, stats, centroids = cv2.connectedComponentsWithStats(img, connectivity=8)
     sizes = stats[:,-1]
     best_score = 1000000000
     best_edge = -1
+
+    # debugging vars
+    best_size = 0
+    best_centroid = (0,0)
+    best_dist = 0
+    best_true_size = 0
+
     for j in range(total_edges):
+        if sizes[j] < min_central_edge_size:
+            continue
+        centroid = (int(centroids[j][0]), int(centroids[j][1]))
         size_score = abs(sizes[j] - avg_central_edge_size)
-        dist_score = abs(centroids[j][0] - image_center[0]) + abs(centroids[j][1] - image_center[1])
+        dist_score = math.hypot((centroid[0] - image_center[0]), abs(centroid[1] - image_center[1]))
         tot_score = (1 - size_vs_location)*size_score + size_vs_location*dist_score
         if tot_score < best_score:
+            best_size = size_score
+            best_dist = dist_score
             best_score = tot_score
             best_edge = j
+            best_centroid = centroid
+            best_true_size = abs(sizes[j])
 
     x, y, w, h = stats[best_edge, 0:4]
     # add box to the image
+    print(f"Tot score: {best_score}\tSize diff: {best_size}\tDist diff: {best_dist}")
     cv2.rectangle(og_img, (x, y), (x + w, y + h), (0, 0, 255), 2)  # red with thickness 2
-
+    cv2.circle(og_img, center=image_center, radius=3, color=(255,0,0))
+    cv2.circle(og_img, center=best_centroid, radius=3, color=(0,255,0))
     final_images.append(og_img)
+
+    # bonus debugging stuff
+    print(f"This size: {best_true_size}")
+    cv2.imshow("Original", original_images[img_num])
+    cv2.imshow("Edges", edge_masks[i])
+    cv2.imshow("Final", final_images[i])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    i += 1
 
 # which image gets displayed in the windows
 im_to_show = 0
 
-while im_to_show < 152:
-    cv2.imshow("Original", original_images[im_to_show])
-    cv2.imshow("Edges", edge_masks[im_to_show])
-    cv2.imshow("Final", final_images[im_to_show])
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+# while im_to_show < 152:
+#     cv2.imshow("Original", original_images[im_to_show])
+#     cv2.imshow("Edges", edge_masks[im_to_show])
+#     cv2.imshow("Final", final_images[im_to_show])
+#     cv2.waitKey(0)
+#     cv2.destroyAllWindows()
 
-    im_to_show += random.randint(1,20)
+#     im_to_show += random.randint(1,20)
