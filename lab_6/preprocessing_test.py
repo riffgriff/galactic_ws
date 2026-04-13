@@ -1,6 +1,28 @@
 import cv2
 from pathlib import Path
 
+def preprocess_image(
+    image,
+    blur_size=5,
+    canny_threshold1=20,
+    canny_threshold2=70,
+    dilate_iterations=1,
+    close_kernel_size=3,
+):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (blur_size, blur_size), sigmaX=0, sigmaY=0)
+    img = cv2.Canny(gray, threshold1=canny_threshold1, threshold2=canny_threshold2)
+    
+    # Strengthen edges with light dilation
+    if dilate_iterations > 0:
+        dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+        img = cv2.dilate(img, dilate_kernel, iterations=dilate_iterations)
+    
+    close_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (close_kernel_size, close_kernel_size))
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, close_kernel)
+    
+    return img
+
 imgs_base_path = Path(__file__).resolve().parent / "2026S_imgs"
 total_images = 153
 image_type = ".png"
@@ -14,20 +36,22 @@ image_center = (int(original_images[0].shape[0]/2), int(original_images[0].shape
 
 # tuneable parameters in this model:
 blur_size = 7 # gaussian blur kernel size
-close_kernel_size = 5 # kernel size for the closing operation
+canny_threshold1 = 20 # lower Canny threshold (catches more edges)
+canny_threshold2 = 70 # upper Canny threshold
+dilate_iterations = 1 # dilate edges to strengthen them
+close_kernel_size = 3 # kernel size for closing operation
 avg_central_edge_size = 100 # expected size of the central object
 size_vs_location = 0.5 # weighting of size and location in object selection - 0 is all size, 1 is all location
 
 for i, og_img in enumerate(original_images):
-    # add blur for better edge detection
-    img = cv2.GaussianBlur(og_img, (blur_size,blur_size), sigmaX=0, sigmaY=0)
-
-    # edge detection
-    img = cv2.Canny(img, threshold1=50, threshold2=150)
-
-    # closing operation to connect edges
-    close_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (close_kernel_size, close_kernel_size))
-    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, close_kernel)
+    img = preprocess_image(
+        og_img,
+        blur_size=blur_size,
+        canny_threshold1=canny_threshold1,
+        canny_threshold2=canny_threshold2,
+        dilate_iterations=dilate_iterations,
+        close_kernel_size=close_kernel_size,
+    )
 
     edge_masks.append(img)
 
@@ -51,7 +75,7 @@ for i, og_img in enumerate(original_images):
     final_images.append(og_img)
 
 # which image gets displayed in the windows
-im_to_show = 116
+im_to_show = 150
 
 cv2.imshow("Original", original_images[im_to_show])
 cv2.imshow("Edges", edge_masks[im_to_show])
