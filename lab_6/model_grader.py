@@ -8,7 +8,7 @@ import numpy as np
 import pickle
 from pathlib import Path
 
-from preprocessing_test import preprocess_image
+from lab_6.img_preprocessing import apply_filters
 
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "2026S_imgs"
@@ -57,7 +57,7 @@ def predict(model, image):
         int: The predicted class label.
     """
 
-    feature = preprocess_image(image).astype(np.float32).flatten() / 255.0
+    feature = apply_filters(image).astype(np.float32).flatten() / 255.0
 
     if isinstance(model, dict):
         kind = model.get("kind")

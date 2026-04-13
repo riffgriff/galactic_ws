@@ -6,6 +6,7 @@ import math
 import pickle
 import numpy as np
 import random
+import img_preprocessing
 
 def check_split_value_range(val):
     try:
@@ -67,8 +68,13 @@ def train_model(data_path, train_lines, image_type, model_filename, save_model):
     """
 
     original_images = list(cv2.imread(data_path+train_lines[i][0]+image_type) for i in range(len(train_lines)))
+    preprocessed_images = list()
 
-    preprocessed_images = original_images # INSERT IMAGE PREPROCESSING HERE
+    for img in original_images:
+        x, y, w, h, _ = img_preprocessing.get_bounding_box(img)
+        if img_preprocessing.is_reasonable_box(w,h):
+            img = img[y:y+h,x:x+w] # crop image
+        preprocessed_images.append(img)
 
     #This line reads in all images listed in the file in color, and resizes them to 25x33 pixels
     train = np.array([np.array(cv2.resize(img, (25,33))) for img in preprocessed_images])
@@ -122,8 +128,15 @@ def test_model(data_path, test_lines, image_type, knn_model, knn_value, show_img
     k = knn_value
 
     for i in range(len(test_lines)):
+
         original_img = cv2.imread(data_path+test_lines[i][0]+image_type)
-        test_img = np.array(cv2.resize(cv2.imread(data_path+test_lines[i][0]+image_type),(25,33)))
+        x, y, w, h, _ = img_preprocessing.get_bounding_box(original_img)
+        if img_preprocessing.is_reasonable_box(w,h):
+            img = original_img[y:y+h,x:x+w] # crop image
+        else:
+            img = original_img
+
+        test_img = np.array(cv2.resize(img,(25,33)))
         if(show_img):
             cv2.imshow(Title_images, original_img)
             cv2.imshow(Title_resized, test_img)

@@ -3,9 +3,9 @@ import cv2
 import argparse
 import csv
 import math
-import pickle
 import numpy as np
 import random
+from img_preprocessing import get_bounding_box
 
 def random_crop(img, min_crop_ratio=0.8, max_crop_ratio=0.95):
     h, w = img.shape[:2]
@@ -44,9 +44,9 @@ def augment_image(img):
     return [
         img,
         random_crop(img),
-        random_rotation(img),
-        cv2.flip(img, 1),
-        cv2.flip(img, 0),
+        #random_rotation(img),
+        # cv2.flip(img, 1),
+        # cv2.flip(img, 0),
         random_scaling(img),
         color_jitter(img),
     ]
@@ -159,7 +159,7 @@ def test_model(data_path, test_lines, image_type, knn_model, knn_value, show_img
 def main():
     parser = argparse.ArgumentParser(description="Augmented KNN Trainer and Tester for 7785 Lab 6")
     parser.add_argument("-p", "--data_path", type=str, required=True, help="Path to the valid dataset directory (must contain labels.txt and images)")
-    parser.add_argument("-r", "--data_split_ratio", type=check_split_value_range, required=False, default=0.9, help="Ratio of the train, test split.")
+    parser.add_argument("-r", "--data_split_ratio", type=check_split_value_range, required=False, default=0.5, help="Ratio of the train, test split.")
     parser.add_argument("-k", "--knn-value", type=check_k_value, required=False, default=1, help="KNN value. Must be an odd integer greater than zero.")
     parser.add_argument("-i", "--image_type", type=str, required=False, default=".png", help="Extension of the image files (e.g. .png, .jpg)")
     parser.add_argument("-s", "--save_model_bool", action='store_true', required=False, help="Boolean flag to save the KNN model as an XML file for later use.")
