@@ -5,6 +5,14 @@ import argparse
 import csv
 import cv2
 import numpy as np
+import pickle
+from pathlib import Path
+
+from preprocessing_test import preprocess_image
+
+
+DEFAULT_DATA_DIR = Path(__file__).resolve().parent / "2026S_imgs"
+DEFAULT_K = 3
 
 # ------------------------------------------------------------------------------
 #                  DO NOT MODIFY FUNCTION NAMES OR ARGUMENTS
@@ -22,15 +30,18 @@ def initialize_model(model_path=None):
         model: Your trained model.
     """
 
-    # TODO: Load your trained model here.
-    # For example, if you saved your model using pickle or a deep learning framework,
-    # load it and return the model object.
-    
-    model = None
+    if not model_path:
+        raise ValueError("model_path is required. Provide a trained model file (.xml, .pkl, or .pickle).")
 
-    raise NotImplementedError("initialize_model() is not implemented. Please implement this function.")
+    model_file = Path(model_path)
+    if model_file.suffix.lower() in {".pkl", ".pickle"}:
+        with model_file.open("rb") as f:
+            return pickle.load(f)
+    if model_file.suffix.lower() == ".xml":
+        knn = cv2.ml.KNearest_load(str(model_file))
+        return {"kind": "opencv_knn", "model": knn, "k": DEFAULT_K, "input_size": (25, 33)}
 
-    return model
+    raise ValueError("Unsupported model format. Use .xml, .pkl, or .pickle")
 
 def predict(model, image):
     """
@@ -46,14 +57,26 @@ def predict(model, image):
         int: The predicted class label.
     """
 
-    # TODO: Implement your model's prediction logic here.
-    # The function should return an integer corresponding to the predicted class.
-    
-    prediction = None
-    
-    raise NotImplementedError("predict() is not implemented. Please implement this function.")
-    
-    return prediction
+    feature = preprocess_image(image).astype(np.float32).flatten() / 255.0
+
+    if isinstance(model, dict):
+        kind = model.get("kind")
+
+        if kind == "opencv_knn":
+            k = int(model.get("k", DEFAULT_K))
+            input_size = model.get("input_size", (25, 33))
+            resized = cv2.resize(image, input_size)
+            sample = resized.flatten().reshape(1, input_size[0] * input_size[1] * 3).astype(np.float32)
+            ret, results, neighbours, dist = model["model"].findNearest(sample, k)
+            return int(ret)
+
+    if hasattr(model, "predict"):
+        predicted = model.predict(feature.reshape(1, -1))
+        if isinstance(predicted, tuple):
+            predicted = predicted[0]
+        return int(np.asarray(predicted).ravel()[0])
+
+    raise TypeError(f"Unsupported model type: {type(model)!r}")
 
 # ------------------------------------------------------------------------------
 #                      DO NOT MODIFY ANY CODE BELOW THIS LINE
