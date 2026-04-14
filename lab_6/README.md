@@ -12,7 +12,7 @@
 
 3. Train augmented KNN model
 
-`python lab_6/augmented_knn_train.py -p lab_6/2026S_imgs/ -r 0.9 -k 7 -s -n lab_6/model -t`
+`python lab_6/knn.py -p lab_6/2026S_imgs/ -r 0.9 -k 7 -s -n lab_6/model -t`
 
 4. Evaluate with grader using XML model
 
