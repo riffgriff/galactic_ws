@@ -58,7 +58,7 @@ class MazeNavigator(Node):
 		self.declare_parameter('ki', 0.0)
 		self.declare_parameter('kd', 0.0001)
 		self.declare_parameter('img_size_steering_threshold', 1000)
-		self.declare_parameter('img_steering_borders', 80)
+		self.declare_parameter('img_steering_borders', 50)
 
 		self.model_path = self.get_parameter('model_path').value
 		self.knn_k = int(self.get_parameter('knn_k').value)
