@@ -103,6 +103,7 @@ class MazeNavigator(Node):
 		self.latest_scan = None
 		self.latest_image = None
 		self.current_yaw = None
+		self.first_yaw = None
 
 		self.state = 'DRIVE_TO_WALL'
 		self.turn_target_yaw = None
@@ -111,6 +112,7 @@ class MazeNavigator(Node):
 
 		self.img_pos = None
 		self.label_list = list()
+
 
 		self.get_logger().info('navigate_maze node started')
 
@@ -130,6 +132,8 @@ class MazeNavigator(Node):
 	def odom_callback(self, msg):
 		q = msg.pose.pose.orientation
 		self.current_yaw = quat_to_yaw(q.x, q.y, q.z, q.w)
+		if self.first_yaw is None:
+			self.first_yaw = self.current_yaw
 
 	def publish_cmd(self, linear_x=0.0, angular_z=0.0):
 		cmd = Twist()
@@ -178,7 +182,7 @@ class MazeNavigator(Node):
 
 	def start_turn(self, delta_rad):
 		if self.current_yaw is not None:
-			self.turn_target_yaw = wrap_angle(self.current_yaw + delta_rad)
+			self.turn_target_yaw = self.nearest_cardinal_direction((self.current_yaw + delta_rad))
 		else:
 			self.turn_target_yaw = None
 
@@ -207,6 +211,21 @@ class MazeNavigator(Node):
 				best_confidence = curr_confidence
 
 		return best_label
+	
+	def nearest_cardinal_direction(self, angle):
+		if self.first_yaw is None:
+			return angle
+		cardinals = list(wrap_angle(self.first_yaw + ang) for ang in (0, math.pi/2, math.pi, 3*math.pi/2))
+
+		best_diff = 100
+		best_index = -1
+		for i, cardinal in enumerate(cardinals):
+			diff = abs(angle - cardinal)
+			if diff < best_diff:
+				best_diff = diff
+				best_index = i
+		return cardinals[best_index]
+		
 
 
 	def control_loop(self):
