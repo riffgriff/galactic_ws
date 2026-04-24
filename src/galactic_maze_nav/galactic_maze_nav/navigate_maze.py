@@ -50,14 +50,14 @@ class MazeNavigator(Node):
 		self.declare_parameter('knn_k', 7)
 		self.declare_parameter('linear_speed', 0.10)
 		self.declare_parameter('angular_speed', 0.8)
-		self.declare_parameter('wall_stop_dist', 0.50)
-		self.declare_parameter('wall_observe_max', 0.60)
+		self.declare_parameter('wall_stop_dist', 0.60)
+		self.declare_parameter('wall_observe_max', 0.70)
 		self.declare_parameter('turn_tolerance_deg', 5.0)
 		self.declare_parameter('search_timeout_s', 8.0)
 		self.declare_parameter('kp', 0.003)
 		self.declare_parameter('ki', 0.0)
 		self.declare_parameter('kd', 0.00002)
-		self.declare_parameter('img_size_steering_threshold', 2500)
+		self.declare_parameter('img_size_steering_threshold', 1500)
 		self.declare_parameter('img_steering_borders', 80)
 
 		self.model_path = self.get_parameter('model_path').value
