@@ -223,6 +223,7 @@ class MazeNavigator(Node):
 				return
 
 			if label == LABEL_GOAL:
+				self.state = 'SEARCH'
 				self.get_logger().info('GOAL sign detected. Stopping.')
 				self.state = 'DONE'
 				return
