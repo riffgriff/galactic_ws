@@ -246,6 +246,7 @@ class MazeNavigator(Node):
 
 		if self.state == 'CLASSIFY':
 			self.publish_cmd(0.0, 0.0)
+			time.sleep(1)
 
 			if d_front > self.wall_observe_max:
 				self.state = 'DRIVE_TO_WALL'
