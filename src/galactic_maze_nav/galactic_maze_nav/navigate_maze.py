@@ -247,18 +247,18 @@ class MazeNavigator(Node):
 				self.publish_cmd(0.0, 0.0)
 				self.start_gather_data()
 			else:
-				# # steer towards objects
-				# angular_effort = 0.0
-				# if self.img_pos is not None:
-				# 	# check if size is within threshold
-				# 	if img_preprocessing.is_reasonable_box(self.img_pos[2], self.img_pos[3], min_area = self.img_size_steering_threshold):
-				# 		pixel_error = 160 - (self.img_pos[0] + self.img_pos[2]/2) # 320 pix wide camera resolution
-				# 		# check if the image is relatively centered
-				# 		if abs(pixel_error) < 160 - self.img_steering_borders:
-				# 			angular_effort = self.pid.get_effort(pixel_error)
-				# self.get_logger().info(f'Driving to wall. Front distance: {d_front:.2f} m, angular effort: {angular_effort:.2f}')
-				# self.publish_cmd(self.linear_speed, angular_effort)
-				self.publish_cmd(self.linear_speed, 0.0)
+				# steer towards objects
+				angular_effort = 0.0
+				if self.img_pos is not None:
+					# check if size is within threshold
+					if img_preprocessing.is_reasonable_box(self.img_pos[2], self.img_pos[3], min_area = self.img_size_steering_threshold):
+						pixel_error = 160 - (self.img_pos[0] + self.img_pos[2]/2) # 320 pix wide camera resolution
+						# check if the image is relatively centered
+						if abs(pixel_error) < 160 - self.img_steering_borders:
+							angular_effort = self.pid.get_effort(pixel_error)
+				self.get_logger().info(f'Driving to wall. Front distance: {d_front:.2f} m, angular effort: {angular_effort:.2f}')
+				self.publish_cmd(self.linear_speed, angular_effort)
+				# self.publish_cmd(self.linear_speed, 0.0)
 			return
 		
 		if self.state == 'GATHER_DATA':
