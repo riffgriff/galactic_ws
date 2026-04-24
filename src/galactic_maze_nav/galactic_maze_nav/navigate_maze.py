@@ -53,7 +53,7 @@ class MazeNavigator(Node):
 		self.declare_parameter('angular_speed', 0.8)
 		self.declare_parameter('wall_stop_dist', 0.55)
 		self.declare_parameter('wall_observe_max', 0.70)
-		self.declare_parameter('turn_tolerance_deg', 5.0)
+		self.declare_parameter('turn_tolerance_deg', 1.0)
 		self.declare_parameter('search_timeout_s', 8.0)
 		self.declare_parameter('kp', 0.005)
 		self.declare_parameter('ki', 0.0)
