@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import math
+import statistics
 import time
 from pathlib import Path
 from dataclasses import dataclass
@@ -59,6 +60,8 @@ class MazeNavigator(Node):
 		self.declare_parameter('kd', 0.0001)
 		self.declare_parameter('img_size_steering_threshold', 3000)
 		self.declare_parameter('img_steering_borders', 70)
+		self.declare_parameter('classification_images', 10)
+		self.declare_parameter('classification_angle_range', 10)
 
 		self.model_path = self.get_parameter('model_path').value
 		self.knn_k = int(self.get_parameter('knn_k').value)
@@ -71,6 +74,8 @@ class MazeNavigator(Node):
 		self.pid = PID_controller(self.get_parameter('kp').value, self.get_parameter('ki').value, self.get_parameter('kd').value, 0.1)
 		self.img_size_steering_threshold = self.get_parameter('img_size_steering_threshold').value
 		self.img_steering_borders = self.get_parameter('img_steering_borders').value
+		self.total_classification_images = self.get_parameter('classification_images').value
+		self.classifiaction_angle_range = self.get_parameter('classification_angle_range').value
 
 		model = Path(self.model_path)
 		if not model.is_absolute():
@@ -108,6 +113,9 @@ class MazeNavigator(Node):
 		self.search_start_time = None
 
 		self.img_pos = None
+		self.label_list = list()
+		self.curr_classification_index = 0
+		self.gather_data_turn = False
 
 		self.get_logger().info('navigate_maze node started')
 
@@ -175,6 +183,12 @@ class MazeNavigator(Node):
 		self.turn_rate_sign = 1.0 if delta_rad >= 0.0 else -1.0
 		self.state = 'TURNING'
 
+	def start_gather_data(self):
+		self.label_list.clear()
+		self.curr_classification_index = 0
+		self.gather_data_turn = True
+		self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
+
 	def control_loop(self):
 		if self.latest_scan is None:
 			self.publish_cmd(0.0, 0.0)
@@ -206,6 +220,21 @@ class MazeNavigator(Node):
 				self.get_logger().info(f'Driving to wall. Front distance: {d_front:.2f} m, angular effort: {angular_effort:.2f}')
 				self.publish_cmd(self.linear_speed, angular_effort)
 			return
+		
+		if self.state == 'GATHER_DATA':
+			# use start_gather_data to enter this state
+
+			if self.curr_classification_index >= self.total_classification_images:
+				# exit the state
+				self.gather_data_turn = False
+				self.self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
+				return
+			
+			self.get_logger().info(f'Taking image {self.curr_classification_index}')
+			self.label_list.append(self.classify_sign())
+			self.curr_classification_index += 1
+			self.start_turn(math.radians(self.classifiaction_angle_range)/self.total_classification_images)	
+
 
 		if self.state == 'CLASSIFY':
 			self.get_logger().info('Classifying sign at wall')
@@ -215,17 +244,11 @@ class MazeNavigator(Node):
 				self.state = 'DRIVE_TO_WALL'
 				return
 
-			label = self.classify_sign()
-			if label is None:
-				self.get_logger().info('No recognizable sign found.')
-				self.state = 'SEARCH'
-				self.search_start_time = time.time()
-				return
+			label = statistics.mode(self.label_list)
 
 			if label == LABEL_GOAL:
-				self.state = 'SEARCH'
 				self.get_logger().info('GOAL sign detected. Searching again.')
-				# self.state = 'DONE'
+				self.state = 'DONE'
 				return
 
 			if label == LABEL_LEFT:
@@ -254,7 +277,10 @@ class MazeNavigator(Node):
 				err = wrap_angle(self.turn_target_yaw - self.current_yaw)
 				if abs(err) <= self.turn_tolerance:
 					self.publish_cmd(0.0, 0.0)
-					self.state = 'DRIVE_TO_WALL'
+					if self.gather_data_turn:
+						self.state = 'GATHER_DATA'
+					else:
+						self.state = 'DRIVE_TO_WALL'
 				else:
 					direction = 1.0 if err > 0.0 else -1.0
 					self.publish_cmd(0.0, direction * self.angular_speed)
@@ -263,7 +289,10 @@ class MazeNavigator(Node):
 				self.publish_cmd(0.0, self.turn_rate_sign * self.angular_speed)
 				if d_front <= self.wall_observe_max:
 					self.publish_cmd(0.0, 0.0)
-					self.state = 'DRIVE_TO_WALL'
+					if self.gather_data_turn:
+						self.state = 'GATHER_DATA'
+					else:
+						self.state = 'DRIVE_TO_WALL'
 			return
 
 @dataclass
