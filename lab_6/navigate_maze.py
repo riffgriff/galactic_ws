@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Twist
+from standard_msgs.msg import String
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
@@ -82,6 +83,7 @@ class MazeNavigator(Node):
 		)
 
 		self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
+		self.state_pub = self.create_publisher(String, '/drive_state', 10)
 		self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, sensor_qos)
 		self.img_sub = self.create_subscription(CompressedImage, '/image_raw/compressed', self.image_callback, sensor_qos)
 		self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_callback, sensor_qos)
@@ -171,6 +173,8 @@ class MazeNavigator(Node):
 		if self.latest_scan is None:
 			self.publish_cmd(0.0, 0.0)
 			return
+
+		self.state_pub.publish(String(self.state))
 
 		d_front = self.front_distance()
 
