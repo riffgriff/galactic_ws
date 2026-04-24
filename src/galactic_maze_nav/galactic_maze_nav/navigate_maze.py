@@ -60,7 +60,6 @@ class MazeNavigator(Node):
 		self.declare_parameter('kd', 0.0001)
 		self.declare_parameter('img_size_steering_threshold', 3000)
 		self.declare_parameter('img_steering_borders', 70)
-		self.declare_parameter('classification_images', 10)
 		self.declare_parameter('classification_angle_range', 50)
 
 		self.model_path = self.get_parameter('model_path').value
@@ -74,7 +73,6 @@ class MazeNavigator(Node):
 		self.pid = PID_controller(self.get_parameter('kp').value, self.get_parameter('ki').value, self.get_parameter('kd').value, 0.1)
 		self.img_size_steering_threshold = self.get_parameter('img_size_steering_threshold').value
 		self.img_steering_borders = self.get_parameter('img_steering_borders').value
-		self.total_classification_images = self.get_parameter('classification_images').value
 		self.classifiaction_angle_range = self.get_parameter('classification_angle_range').value
 
 		model = Path(self.model_path)
@@ -114,8 +112,6 @@ class MazeNavigator(Node):
 
 		self.img_pos = None
 		self.label_list = list()
-		self.curr_classification_index = 0
-		self.gather_data_turn = False
 
 		self.get_logger().info('navigate_maze node started')
 
@@ -184,10 +180,9 @@ class MazeNavigator(Node):
 		self.state = 'TURNING'
 
 	def start_gather_data(self):
+		self.angle_goals = [-math.radians(self.classifiaction_angle_range)/2, math.radians(self.classifiaction_angle_range)/2, 0]
 		self.label_list.clear()
-		self.curr_classification_index = 0
-		self.gather_data_turn = True
-		self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
+		self.state = "GATHER_DATA"
 
 	def control_loop(self):
 		if self.latest_scan is None:
@@ -224,17 +219,23 @@ class MazeNavigator(Node):
 		if self.state == 'GATHER_DATA':
 			# use start_gather_data to enter this state
 
-			if self.curr_classification_index >= self.total_classification_images:
-				# exit the state
-				self.gather_data_turn = False
-				self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
+			# exit if all angle goals have been reached
+			if len(self.angle_goals) == 0:
+				self.state = 'CLASSIFY'
 				return
-			
-			self.get_logger().info(f'Taking image {self.curr_classification_index}')
-			self.label_list.append(self.classify_sign())
-			self.curr_classification_index += 1
-			self.start_turn(math.radians(self.classifiaction_angle_range)/self.total_classification_images)	
 
+			# turn to current angle goal
+			if self.current_yaw is not None:
+				err = wrap_angle(self.angle_goals[0] - self.current_yaw)
+				if abs(err) <= self.turn_tolerance:
+					self.publish_cmd(0.0, 0.0)
+					self.angle_goals.pop(0)
+				else:
+					direction = 1.0 if err > 0.0 else -1.0
+					self.publish_cmd(0.0, direction * self.angular_speed/2.0)
+
+			self.get_logger().info(f'Gathering image data')
+			self.label_list.append(self.classify_sign())
 
 		if self.state == 'CLASSIFY':
 			self.get_logger().info('Classifying sign at wall')
@@ -277,10 +278,7 @@ class MazeNavigator(Node):
 				err = wrap_angle(self.turn_target_yaw - self.current_yaw)
 				if abs(err) <= self.turn_tolerance:
 					self.publish_cmd(0.0, 0.0)
-					if self.gather_data_turn:
-						self.state = 'GATHER_DATA'
-					else:
-						self.state = 'DRIVE_TO_WALL'
+					self.state = 'DRIVE_TO_WALL'
 				else:
 					direction = 1.0 if err > 0.0 else -1.0
 					self.publish_cmd(0.0, direction * self.angular_speed)
@@ -289,10 +287,7 @@ class MazeNavigator(Node):
 				self.publish_cmd(0.0, self.turn_rate_sign * self.angular_speed)
 				if d_front <= self.wall_observe_max:
 					self.publish_cmd(0.0, 0.0)
-					if self.gather_data_turn:
-						self.state = 'GATHER_DATA'
-					else:
-						self.state = 'DRIVE_TO_WALL'
+					self.state = 'DRIVE_TO_WALL'
 			return
 
 @dataclass
