@@ -173,7 +173,7 @@ class MazeNavigator(Node):
 			self.publish_cmd(0.0, 0.0)
 			return
 
-		self.state_pub.publish(String(self.state))
+		self.state_pub.publish(String(data=self.state))
 
 		d_front = self.front_distance()
 
