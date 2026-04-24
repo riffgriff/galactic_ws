@@ -54,10 +54,11 @@ class MazeNavigator(Node):
 		self.declare_parameter('wall_observe_max', 0.60)
 		self.declare_parameter('turn_tolerance_deg', 5.0)
 		self.declare_parameter('search_timeout_s', 8.0)
-		self.declare_parameter('kp', 0.008)
+		self.declare_parameter('kp', 0.0008)
 		self.declare_parameter('ki', 0.0)
-		self.declare_parameter('kd', 0.0005)
-		self.declare_parameter('img_size_steering_threshold', 5000)
+		self.declare_parameter('kd', 0.00002)
+		self.declare_parameter('img_size_steering_threshold', 2500)
+		self.declare_parameter('img_steering_borders', 80)
 
 		self.model_path = self.get_parameter('model_path').value
 		self.knn_k = int(self.get_parameter('knn_k').value)
@@ -69,6 +70,7 @@ class MazeNavigator(Node):
 		self.search_timeout = float(self.get_parameter('search_timeout_s').value)
 		self.pid = PID_controller(self.get_parameter('kp').value, self.get_parameter('ki').value, self.get_parameter('kd').value, 0.1)
 		self.img_size_steering_threshold = self.get_parameter('img_size_steering_threshold').value
+		self.img_steering_borders = self.get_parameter('img_steering_borders').value
 
 		model = Path(self.model_path)
 		if not model.is_absolute():
@@ -196,9 +198,12 @@ class MazeNavigator(Node):
 				# steer towards objects
 				angular_effort = 0.0
 				if self.img_pos is not None:
+					# check if size is within threshold
 					if self.img_pos[2]*self.img_pos[3] > self.img_size_steering_threshold:
 						pixel_error = 160 - (self.img_pos[0] + self.img_pos[2]/2) # 320 pix wide camera resolution
-						angular_effort = self.pid.get_effort(pixel_error)
+						# check if the image is relatively centered
+						if abs(pixel_error) < 160 - self.img_steering_borders:
+							angular_effort = self.pid.get_effort(pixel_error)
 				self.publish_cmd(self.linear_speed, angular_effort)
 			return
 
