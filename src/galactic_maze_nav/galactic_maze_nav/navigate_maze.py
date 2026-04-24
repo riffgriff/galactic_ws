@@ -178,10 +178,12 @@ class MazeNavigator(Node):
 		d_front = self.front_distance()
 
 		if self.state == 'DONE':
+			self.get_logger().info('Navigation complete. Stopping.')
 			self.publish_cmd(0.0, 0.0)
 			return
 
 		if self.state == 'DRIVE_TO_WALL':
+			self.get_logger().info(f'Driving to wall. Front distance: {d_front:.2f} m')
 			if d_front <= self.wall_stop_dist:
 				self.publish_cmd(0.0, 0.0)
 				self.state = 'CLASSIFY'
@@ -190,6 +192,7 @@ class MazeNavigator(Node):
 			return
 
 		if self.state == 'CLASSIFY':
+			self.get_logger().info('Classifying sign at wall')
 			self.publish_cmd(0.0, 0.0)
 
 			if d_front > self.wall_observe_max:
@@ -198,6 +201,7 @@ class MazeNavigator(Node):
 
 			label = self.classify_sign()
 			if label is None:
+				self.get_logger().info('No recognizable sign found.')
 				self.state = 'SEARCH'
 				self.search_start_time = time.time()
 				return
@@ -208,19 +212,23 @@ class MazeNavigator(Node):
 				return
 
 			if label == LABEL_LEFT:
+				self.get_logger().info('LEFT sign detected.')
 				self.start_turn(math.pi / 2.0)
 				return
 
 			if label == LABEL_RIGHT:
+				self.get_logger().info('RIGHT sign detected.')
 				self.start_turn(-math.pi / 2.0)
 				return
 
 			if label in (LABEL_DO_NOT_ENTER, LABEL_STOP):
+				self.get_logger().info('DO NOT ENTER or STOP sign detected.')
 				self.start_turn(math.pi)
 				return
 
 			# Empty / unknown
 			self.state = 'SEARCH'
+			self.get_logger().info('No recognizable sign found. Searching.')
 			self.search_start_time = time.time()
 			return
 
