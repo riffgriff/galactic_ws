@@ -227,7 +227,7 @@ class MazeNavigator(Node):
 			if self.curr_classification_index >= self.total_classification_images:
 				# exit the state
 				self.gather_data_turn = False
-				self.self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
+				self.start_turn(-math.radians(self.classifiaction_angle_range)/2)
 				return
 			
 			self.get_logger().info(f'Taking image {self.curr_classification_index}')
