@@ -244,31 +244,8 @@ class MazeNavigator(Node):
 				return
 
 			# Empty / unknown
-			self.state = 'SEARCH'
-			self.get_logger().info('No recognizable sign found. Searching.')
-			self.search_start_time = time.time()
-			return
-
-		if self.state == 'SEARCH':
-			self.publish_cmd(0.0, 0.5)
-
-			label = self.classify_sign()
-			if label == LABEL_GOAL:
-				self.state = 'DONE'
-				return
-			if label == LABEL_LEFT:
-				self.start_turn(math.pi / 2.0)
-				return
-			if label == LABEL_RIGHT:
-				self.start_turn(-math.pi / 2.0)
-				return
-			if label in (LABEL_DO_NOT_ENTER, LABEL_STOP):
-				self.start_turn(math.pi)
-				return
-
-			if self.search_start_time is not None and (time.time() - self.search_start_time) > self.search_timeout:
-				# fallback behavior if no useful sign found
-				self.start_turn(math.pi)
+			self.start_turn(math.pi / 2.0) # just go left
+			self.get_logger().info('No recognizable sign found. Turned left.')
 			return
 
 		if self.state == 'TURNING':
