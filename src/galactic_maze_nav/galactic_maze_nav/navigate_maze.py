@@ -68,7 +68,7 @@ class MazeNavigator(Node):
 		self.turn_tolerance = math.radians(float(self.get_parameter('turn_tolerance_deg').value))
 		self.search_timeout = float(self.get_parameter('search_timeout_s').value)
 		self.pid = PID_controller(self.get_parameter('kp').value, self.get_parameter('ki').value, self.get_parameter('kd').value, 0.1)
-		self.img_size_steering_threshold
+		self.img_size_steering_threshold = self.get_parameter('img_size_steering_threshold').value
 
 		model = Path(self.model_path)
 		if not model.is_absolute():
