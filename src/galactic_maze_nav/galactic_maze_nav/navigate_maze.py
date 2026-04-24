@@ -54,7 +54,7 @@ class MazeNavigator(Node):
 		self.declare_parameter('wall_observe_max', 0.60)
 		self.declare_parameter('turn_tolerance_deg', 5.0)
 		self.declare_parameter('search_timeout_s', 8.0)
-		self.declare_parameter('kp', 0.0008)
+		self.declare_parameter('kp', 0.003)
 		self.declare_parameter('ki', 0.0)
 		self.declare_parameter('kd', 0.00002)
 		self.declare_parameter('img_size_steering_threshold', 2500)
