@@ -12,11 +12,8 @@ from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
 from sensor_msgs.msg import CompressedImage, LaserScan
+import img_preprocessing
 
-try:
-	import img_preprocessing
-except Exception:
-	img_preprocessing = None
 
 
 LABEL_EMPTY = 0
