@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'nav_maze=galactic_maze_nav.navigate_maze:main',
         ],
     },
 )
