@@ -220,7 +220,7 @@ class MazeNavigator(Node):
 		best_diff = 100
 		best_index = -1
 		for i, cardinal in enumerate(cardinals):
-			diff = abs(angle - cardinal)
+			diff = abs(wrap_angle(angle - cardinal))
 			if diff < best_diff:
 				best_diff = diff
 				best_index = i
