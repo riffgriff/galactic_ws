@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import math
-import statistics
 import time
 from pathlib import Path
 from dataclasses import dataclass
@@ -160,15 +159,22 @@ class MazeNavigator(Node):
 
 	def classify_sign(self):
 		if self.latest_image is None:
-			return None
+			return (None, None)
 
 		img = self.latest_image
 
 		input_size = (25, 33)
 		resized = cv2.resize(img, input_size)
 		sample = resized.flatten().reshape(1, input_size[0] * input_size[1] * 3).astype(np.float32)
-		ret, _, _, _ = self.knn.findNearest(sample, int(self.knn_k))
-		return int(ret)
+		ret, _, neighbor_labels, _ = self.knn.findNearest(sample, int(self.knn_k))
+
+		# get confidence fraction
+		predicted_label = int(ret)
+		neighbors = neighbor_labels[0]
+
+		votes_for_winner = np.sum(neighbors == predicted_label)
+		confidence = votes_for_winner / self.knn_k
+		return (int(ret), confidence)
 
 	def start_turn(self, delta_rad):
 		if self.current_yaw is not None:
@@ -187,6 +193,21 @@ class MazeNavigator(Node):
 		self.angle_goals = [wrap_angle(self.current_yaw + angle) for angle in relative_angles]
 		self.label_list.clear()
 		self.state = "GATHER_DATA"
+
+	def get_best_result(self, results_list):
+		best_label = -1
+		best_confidence = 0
+		for label in range(5):
+			curr_confidence = 0
+			for knn_label, confidence in results_list:
+				if knn_label == label:
+					curr_confidence += confidence
+			if curr_confidence > best_confidence:
+				best_label = label
+				best_confidence = curr_confidence
+
+		return best_label
+
 
 	def control_loop(self):
 		if self.latest_scan is None:
@@ -234,9 +255,9 @@ class MazeNavigator(Node):
 				err = wrap_angle(self.angle_goals[0] - self.current_yaw)
 				if abs(err) <= self.turn_tolerance:
 					self.publish_cmd(0.0, 0.0)
-					label = self.classify_sign()
+					label, confidence = self.classify_sign() # label, confidence
 					if label is not None:
-						self.label_list.append(label)
+						self.label_list.append((label, confidence))
 					self.angle_goals.pop(0)
 				else:
 					direction = 1.0 if err > 0.0 else -1.0
@@ -258,7 +279,9 @@ class MazeNavigator(Node):
 				self.start_turn(math.pi / 2.0)
 				return
 
-			label = statistics.mode(self.label_list)
+			#3 get weighted mode of results list
+
+			label = self.get_best_result(self.label_list)
 			self.get_logger().info(f'Classifying sign at wall.\nBased on {len(self.label_list)} images, classified as {label}')
 
 			if label == LABEL_GOAL:
