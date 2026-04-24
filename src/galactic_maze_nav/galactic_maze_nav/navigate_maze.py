@@ -180,7 +180,11 @@ class MazeNavigator(Node):
 		self.state = 'TURNING'
 
 	def start_gather_data(self):
+		if self.current_yaw is None:
+			return
 		self.angle_goals = [-math.radians(self.classifiaction_angle_range)/2, math.radians(self.classifiaction_angle_range)/2, 0]
+		for angle in self.angle_goals:
+			angle = wrap_angle(self.current_yaw + angle)
 		self.label_list.clear()
 		self.state = "GATHER_DATA"
 
@@ -238,7 +242,6 @@ class MazeNavigator(Node):
 			self.label_list.append(self.classify_sign())
 
 		if self.state == 'CLASSIFY':
-			self.get_logger().info('Classifying sign at wall')
 			self.publish_cmd(0.0, 0.0)
 
 			if d_front > self.wall_observe_max:
@@ -246,6 +249,7 @@ class MazeNavigator(Node):
 				return
 
 			label = statistics.mode(self.label_list)
+			self.get_logger().info(f'Classifying sign at wall.\nBased on {len(self.label_list)} images, classified as {label}')
 
 			if label == LABEL_GOAL:
 				self.get_logger().info('GOAL sign detected. Searching again.')
