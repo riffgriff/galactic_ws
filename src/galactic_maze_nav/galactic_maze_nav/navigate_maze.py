@@ -53,6 +53,10 @@ class MazeNavigator(Node):
 		self.declare_parameter('wall_observe_max', 0.45)
 		self.declare_parameter('turn_tolerance_deg', 5.0)
 		self.declare_parameter('search_timeout_s', 8.0)
+		self.declare_parameter('kp', 0.008)
+		self.declare_parameter('ki', 0.0)
+		self.declare_parameter('kd', 0.0005)
+		self.declare_parameter('img_size_steering_threshold', 5000)
 
 		self.model_path = self.get_parameter('model_path').value
 		self.knn_k = int(self.get_parameter('knn_k').value)
@@ -62,6 +66,8 @@ class MazeNavigator(Node):
 		self.wall_observe_max = float(self.get_parameter('wall_observe_max').value)
 		self.turn_tolerance = math.radians(float(self.get_parameter('turn_tolerance_deg').value))
 		self.search_timeout = float(self.get_parameter('search_timeout_s').value)
+		self.pid = PID_controller(self.get_parameter('kp').value, self.get_parameter('ki').value, self.get_parameter('kd').value, 0.1)
+		self.img_size_steering_threshold
 
 		model = Path(self.model_path)
 		if not model.is_absolute():
@@ -98,6 +104,8 @@ class MazeNavigator(Node):
 		self.turn_rate_sign = 1.0
 		self.search_start_time = None
 
+		self.img_pos = None
+
 		self.get_logger().info('navigate_maze node started')
 
 	def scan_callback(self, msg):
@@ -107,7 +115,11 @@ class MazeNavigator(Node):
 		arr = np.frombuffer(msg.data, dtype=np.uint8)
 		img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
 		if img is not None:
+			x, y, w, h, _ = img_preprocessing.get_bounding_box(img)
+			if img_preprocessing.is_reasonable_box(w,h):
+				img = img[y:y + h, x:x + w]
 			self.latest_image = img
+			self.img_pos = (x, y, w, h)
 
 	def odom_callback(self, msg):
 		q = msg.pose.pose.orientation
@@ -145,14 +157,6 @@ class MazeNavigator(Node):
 
 		img = self.latest_image
 
-		if img_preprocessing is not None:
-			try:
-				x, y, w, h, _ = img_preprocessing.get_bounding_box(img)
-				if img_preprocessing.is_reasonable_box(w,h):
-					img = img[y:y + h, x:x + w]
-			except Exception:
-				pass
-
 		input_size = (25, 33)
 		resized = cv2.resize(img, input_size)
 		sample = resized.flatten().reshape(1, input_size[0] * input_size[1] * 3).astype(np.float32)
@@ -186,7 +190,13 @@ class MazeNavigator(Node):
 				self.publish_cmd(0.0, 0.0)
 				self.state = 'CLASSIFY'
 			else:
-				self.publish_cmd(self.linear_speed, 0.0)
+				# steer towards objects
+				angular_effort = 0.0
+				if self.img_pos is not None:
+					if self.img_pos[2]*self.img_pos[3] > self.img_size_steering_threshold:
+						pixel_error = 160 - (self.img_pos[0] + self.img_pos[2]/2) # 320 pix wide camera resolution
+						angular_effort = self.pid.get_effort(pixel_error)
+				self.publish_cmd(self.linear_speed, angular_effort)
 			return
 
 		if self.state == 'CLASSIFY':
@@ -264,6 +274,26 @@ class MazeNavigator(Node):
 					self.state = 'DRIVE_TO_WALL'
 			return
 
+@dataclass
+class PID_controller:
+    # implements a PID controller with a fixed period
+    kp: float
+    ki: float
+    kd: float
+    period: float
+
+    def __post_init__(self):
+        self.reset()
+
+    def get_effort(self, error):
+        self.error_sum += error
+        output = self.kp*error + self.ki*self.error_sum*self.period + self.kd*(error-self.prev_error)/self.period
+        self.prev_error = error
+        return output
+    
+    def reset(self):
+        self.error_sum = 0.0
+        self.prev_error = 0.0
 
 def main(args=None):
 	rclpy.init(args=args)
