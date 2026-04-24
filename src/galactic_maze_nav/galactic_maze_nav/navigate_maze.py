@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import rclpy
 from geometry_msgs.msg import Twist
-from standard_msgs.msg import String
+from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
