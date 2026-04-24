@@ -50,7 +50,7 @@ class MazeNavigator(Node):
 		self.declare_parameter('model_path', str(default_model_path))
 		self.declare_parameter('knn_k', 7)
 		self.declare_parameter('linear_speed', 0.10)
-		self.declare_parameter('angular_speed', 0.8)
+		self.declare_parameter('angular_speed', 0.6)
 		self.declare_parameter('wall_stop_dist', 0.55)
 		self.declare_parameter('wall_observe_max', 0.70)
 		self.declare_parameter('turn_tolerance_deg', 1.0)
@@ -246,6 +246,7 @@ class MazeNavigator(Node):
 
 		if self.state == 'CLASSIFY':
 			self.publish_cmd(0.0, 0.0)
+			time.sleep(1)
 
 			if d_front > self.wall_observe_max:
 				self.state = 'DRIVE_TO_WALL'
