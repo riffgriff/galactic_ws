@@ -6,6 +6,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import rclpy
+from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
@@ -43,7 +44,8 @@ class MazeNavigator(Node):
 		super().__init__('navigate_maze_node')
 
 		# Parameters
-		self.declare_parameter('model_path', str(Path(__file__).resolve().parent / 'model.xml'))
+		default_model_path = Path(get_package_share_directory('galactic_maze_nav')) / 'model.xml'
+		self.declare_parameter('model_path', str(default_model_path))
 		self.declare_parameter('knn_k', 7)
 		self.declare_parameter('linear_speed', 0.10)
 		self.declare_parameter('angular_speed', 0.8)
