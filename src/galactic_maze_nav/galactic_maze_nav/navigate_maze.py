@@ -198,7 +198,7 @@ class MazeNavigator(Node):
 				angular_effort = 0.0
 				if self.img_pos is not None:
 					# check if size is within threshold
-					if self.img_pos[2]*self.img_pos[3] > self.img_size_steering_threshold:
+					if img_preprocessing.is_reasonable_box(self.img_pos[2], self.img_pos[3], min_area = 1000):
 						pixel_error = 160 - (self.img_pos[0] + self.img_pos[2]/2) # 320 pix wide camera resolution
 						# check if the image is relatively centered
 						if abs(pixel_error) < 160 - self.img_steering_borders:
