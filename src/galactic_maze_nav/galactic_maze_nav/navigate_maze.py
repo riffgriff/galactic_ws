@@ -206,7 +206,7 @@ class MazeNavigator(Node):
 		if self.state == 'DRIVE_TO_WALL':
 			if d_front <= self.wall_stop_dist:
 				self.publish_cmd(0.0, 0.0)
-				self.state = 'CLASSIFY'
+				self.start_gather_data()
 			else:
 				# steer towards objects
 				angular_effort = 0.0
