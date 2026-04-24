@@ -182,9 +182,9 @@ class MazeNavigator(Node):
 	def start_gather_data(self):
 		if self.current_yaw is None:
 			return
-		self.angle_goals = [-math.radians(self.classifiaction_angle_range)/2, math.radians(self.classifiaction_angle_range)/2, 0]
-		for angle in self.angle_goals:
-			angle = wrap_angle(self.current_yaw + angle)
+		half_range = math.radians(self.classifiaction_angle_range) / 2.0
+		relative_angles = [-half_range, half_range, 0.0]
+		self.angle_goals = [wrap_angle(self.current_yaw + angle) for angle in relative_angles]
 		self.label_list.clear()
 		self.state = "GATHER_DATA"
 
@@ -233,13 +233,16 @@ class MazeNavigator(Node):
 				err = wrap_angle(self.angle_goals[0] - self.current_yaw)
 				if abs(err) <= self.turn_tolerance:
 					self.publish_cmd(0.0, 0.0)
+					label = self.classify_sign()
+					if label is not None:
+						self.label_list.append(label)
 					self.angle_goals.pop(0)
 				else:
 					direction = 1.0 if err > 0.0 else -1.0
 					self.publish_cmd(0.0, direction * self.angular_speed/2.0)
 
 			self.get_logger().info(f'Gathering image data')
-			self.label_list.append(self.classify_sign())
+			return
 
 		if self.state == 'CLASSIFY':
 			self.publish_cmd(0.0, 0.0)
@@ -248,11 +251,16 @@ class MazeNavigator(Node):
 				self.state = 'DRIVE_TO_WALL'
 				return
 
+			if len(self.label_list) == 0:
+				self.get_logger().info('No valid gathered labels. Turning left.')
+				self.start_turn(math.pi / 2.0)
+				return
+
 			label = statistics.mode(self.label_list)
 			self.get_logger().info(f'Classifying sign at wall.\nBased on {len(self.label_list)} images, classified as {label}')
 
 			if label == LABEL_GOAL:
-				self.get_logger().info('GOAL sign detected. Searching again.')
+				self.get_logger().info('GOAL sign detected. Stopping.')
 				self.state = 'DONE'
 				return
 
