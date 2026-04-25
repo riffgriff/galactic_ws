@@ -201,7 +201,7 @@ class MazeNavigator(Node):
 	def get_best_result(self, results_list):
 		best_label = -1
 		best_confidence = 0
-		for label in range(5):
+		for label in range(6):
 			curr_confidence = 0
 			for knn_label, confidence in results_list:
 				if knn_label == label:
